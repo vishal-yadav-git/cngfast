@@ -1,0 +1,261 @@
+const faqHeaders = document.querySelectorAll(".faqs-container .faq-header");
+faqHeaders.forEach((header, img) => {
+    header.addEventListener("click", () => {
+        header.nextElementSibling.classList.toggle("active");
+
+        const open = header.querySelector(".open");
+        const close = header.querySelector(".close");
+
+        if (header.nextElementSibling.classList.contains("active")) {
+            open.classList.remove("active");
+            close.classList.add("active");
+        } else {
+            open.classList.add("active");
+            close.classList.remove("active");
+        }
+    });
+});
+
+// --------------------------------faq--------------------------------
+
+const faqs = document.querySelectorAll(".faq");
+faqs.forEach((faq) => {
+    faq.addEventListener("click", () => {
+        if (faq.classList.contains("active")) {
+            faq.classList.remove("active");
+        } else {
+            faqs.forEach((f) => f.classList.remove("active"));
+
+            faq.classList.add("active");
+        }
+    });
+});
+
+// ----------------------------------------------------------------------------------------------
+
+let slideImages = document.querySelectorAll('.slides img');
+let next = document.querySelector('.next');
+let prev = document.querySelector('.prev');
+let dots = document.querySelectorAll('.dot');
+let counter = 0;
+let deletInterval;
+
+
+function autoSliding() {
+    deletInterval = setInterval(slideNext, 3000);
+}
+autoSliding();
+
+
+function resetAutoSliding() {
+    clearInterval(deletInterval);
+    autoSliding();
+}
+
+
+next.addEventListener('click', function () {
+    clearInterval(deletInterval);
+    slideNext();
+    resetAutoSliding();
+});
+
+function slideNext() {
+    slideImages[counter].style.animation = 'next1 0.5s ease-in forwards';
+    counter = (counter >= slideImages.length - 1) ? 0 : counter + 1;
+    slideImages[counter].style.animation = 'next2 0.5s ease-in forwards';
+    indicators();
+}
+
+
+prev.addEventListener('click', function () {
+    clearInterval(deletInterval);
+    slidePrev();
+    resetAutoSliding();
+});
+
+function slidePrev() {
+    slideImages[counter].style.animation = 'prev1 0.5s ease-in forwards';
+    counter = (counter === 0) ? slideImages.length - 1 : counter - 1;
+    slideImages[counter].style.animation = 'prev2 0.5s ease-in forwards';
+    indicators();
+}
+
+
+const container = document.querySelector('.slide-container');
+container.addEventListener('mouseover', function () {
+    clearInterval(deletInterval);
+});
+container.addEventListener('mouseout', function () {
+    resetAutoSliding();
+});
+
+
+function indicators() {
+    dots.forEach(dot => dot.className = dot.className.replace(' active', ''));
+    dots[counter].className += ' active';
+}
+
+function switchImage(currentImage) {
+    let imageId = parseInt(currentImage.getAttribute('attr'));
+    clearInterval(deletInterval);
+    if (imageId !== counter) {
+        slideImages[counter].style.animation = (imageId > counter) ? 'next1 0.5s ease-in forwards' : 'prev1 0.5s ease-in forwards';
+        counter = imageId;
+        slideImages[counter].style.animation = (imageId > counter) ? 'next2 0.5s ease-in forwards' : 'prev2 0.5s ease-in forwards';
+        indicators();
+    }
+    resetAutoSliding();
+}
+
+dots.forEach(dot => {
+    dot.addEventListener('click', function () {
+        switchImage(dot);
+    });
+});
+
+// --------------------------------- Modal popup functionality ----------------------------------------------
+function openModal(image) {
+    let modal = document.getElementById("imageModal");
+    let modalImg = document.getElementById("modalImage");
+
+    modal.style.display = "block";
+    modalImg.src = image.src;
+}
+
+function closeModal() {
+    let modal = document.getElementById("imageModal");
+    modal.style.display = "none";
+}
+
+window.openModal = openModal;
+window.closeModal = closeModal;
+
+// ---------------------------------------client tab------------------------------------------------------
+
+var tablinks = document.getElementsByClassName("tab-links");
+var tabcontents = document.getElementsByClassName("tab-contents");
+
+function opentab(tabname) {
+    let tablink = document.getElementsByClassName('tab-contents');
+    let tabcontent = document.getElementsByClassName('tab-links');
+    for (tablink of tablinks) {
+        tablink.classList.remove("active-link");
+    }
+    for (tabcontent of tabcontents) {
+        tabcontent.classList.remove("active-tab");
+    }
+    event.currentTarget.classList.add("active-link");
+    document.getElementById(tabname).classList.add("active-tab");
+}
+window.opentab = opentab;
+
+// ---------------------------------------Review form------------------------------------------------------
+
+function togglePopup() {
+    const overlay = document.getElementById('popupOverlay');
+    overlay.classList.toggle('show');
+    clearForm();
+}
+
+window.togglePopup = togglePopup;
+
+function validateName() {
+    const name = document.getElementById('name').value;
+    const nameError = document.getElementById('nameError');
+    if (name.length < 3) {
+        nameError.textContent = "Enter a vaild name";
+        return false;
+    } else {
+        nameError.textContent = "";
+        return true;
+    }
+}
+window.validateName = validateName;
+
+function validateNumber() {
+    const mobile = document.getElementById('mobileno').value;
+    const mobileError = document.getElementById('mobileError');
+    if (mobile.length !== 10) {
+        mobileError.textContent = "Enter valid 10-digit mobile number";
+        return false;
+    } else {
+        mobileError.textContent = "";
+        return true;
+    }
+}
+window.validateNumber = validateNumber;
+
+function validateReview() {
+    const review = document.getElementById('review').value;
+    const reviewError = document.getElementById('reviewError');
+    if (review.length < 5) {
+        reviewError.textContent = "Enter minimum of 5 characters";
+        return false;
+    } else {
+        reviewError.textContent = "";
+        return true;
+    }
+}
+window.validateReview = validateReview;
+
+function validateStarRating() {
+    const starRating = document.querySelector('input[name="star"]:checked');
+    const starError = document.getElementById('starError');
+    if (!starRating) {
+        starError.textContent = "Please select a rating";
+        return false;
+    } else {
+        starError.textContent = "";
+        return true;
+    }
+}
+window.validateStarRating = validateStarRating;
+
+function clearForm() {
+    document.getElementById('name').value = '';
+    document.getElementById('mobileno').value = '';
+    document.getElementById('review').value = '';
+    document.getElementById('nameError').textContent = '';
+    document.getElementById('mobileError').textContent = '';
+    document.getElementById('reviewError').textContent = '';
+    document.querySelectorAll('input[name="star"]').forEach(star => star.checked = false);
+}
+
+function validateForm() {
+    const isValidName = validateName();
+    const isValidNumber = validateNumber();
+    const isValidReview = validateReview();
+    const formMessage = document.getElementById('formMessage');
+    const isValidStarRating = validateStarRating();
+
+    if (!isValidName || !isValidNumber || !isValidReview || !isValidStarRating) {
+        formMessage.textContent = "";
+        return false;
+    }
+
+    formMessage.textContent = "Your Review submitted successfully😄";
+    setTimeout(() => {
+        togglePopup();
+        formMessage.textContent = "";
+        clearForm();
+    }, 2000);
+    return false;
+}
+window.validateForm = validateForm;
+
+document.getElementById('mobileno').addEventListener('keypress', function (e) {
+    if (!/[0-9]/.test(e.key) || this.value.length >= 10) {
+        e.preventDefault();
+    }
+});
+
+function clearError(errorId) {
+    document.getElementById(errorId).textContent = '';
+}
+window.clearError = clearError;
+
+document.querySelectorAll('.star_rating label').forEach(label => {
+    label.addEventListener('mouseover', function () {
+        document.getElementById('starError').textContent = '';
+    });
+});

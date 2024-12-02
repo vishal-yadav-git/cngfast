@@ -1,0 +1,294 @@
+import Components from './util.js';
+import apis from "./apiConfig.js";
+const { openSubDomainUrl } = Components;
+const instance = new openSubDomainUrl();
+window.openApp = instance.openApp.bind(instance);
+
+
+function updateCampaignStatus(id) {
+  const urlWithParams = `${apis.marketing.campaign}?id=${encodeURIComponent(id)}`;
+  fetch(urlWithParams, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+const urlParams = new URLSearchParams(window.location.search);
+const dynamicId = urlParams.get('campaign');
+if (dynamicId) {
+  updateCampaignStatus(dynamicId);
+}
+
+
+const footerBtn = document.getElementById('footer_bookbtn');
+if (footerBtn) {
+  footerBtn.addEventListener('click', () => {
+    toggleSlider('bookService');
+  });
+}
+
+function openurl(url) {
+  window.open("https://" + url, "_blank");
+}
+window.openurl = openurl;
+
+function toggleSlider(screenEvent, query = null) {
+  const body = document.body;
+  body.style.height = '100vh';
+  body.style.overflowY = 'hidden';
+
+  const slider = document.getElementById('globalSlider');
+  slider.classList.toggle('open');
+
+  let iframeURL = '';
+
+  switch (screenEvent) {
+    case 'bookService':
+      iframeURL = 'https://app.readyassist.in/book-service';
+      slider.innerHTML = `
+        <div style="position: absolute; top: 14px; right: 14px; display: grid; place-items: center;">
+          <svg onclick="closeSlider()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+            stroke="#000" style="width: 28px;height: 28px;cursor: pointer;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </div>
+
+        <!-- Loader shown while iframe is loading -->
+        <div id="loader1" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+          <div>
+            <div class="loader1"></div>
+            <p style="text-align: center;padding-top: 10px;color: #000;font-weight: 600;">Loading...</p>
+          </div>
+        </div>
+
+        <iframe id="dynamicIframe" allow="geolocation" style="border: 0; width: 100%; height: 100%; max-height: 100dvh;" src="${iframeURL}"
+          frameborder="0">
+        </iframe>
+        <div id="reloadBtn" style="display: none; position: absolute; bottom: 20px; right: 20px;">
+          <button onclick="reloadIframe('${iframeURL}')">Reload Iframe</button>
+        </div>
+      `;
+      break;
+
+    case 'cngBooking':
+      iframeURL = `https://app.readyassist.in/cng-check-eligibility.html/reg?number=`;
+      slider.innerHTML = `
+        <div style="position: absolute; top: 14px; right: 14px; display: grid; place-items: center;">
+          <svg onclick="closeSlider()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+            stroke="#000" style="width: 28px;height: 28px;cursor: pointer;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </div>
+
+        <!-- Loader shown while iframe is loading -->
+        <div id="loader1" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+          <div style="display: flex; justify-content: center; align-items: center; width: 100vw;height: 100vh;background-color: white;">
+            <div>
+              <div class="loader1"></div>
+              <p style="text-align: center;padding-top: 10px;color: #000;font-weight: 600;">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <iframe id="dynamicIframe" allow="geolocation" style="border: 0; width: 100%; height: 100%; max-height: 100dvh;" src="${iframeURL}"
+          frameborder="0">
+        </iframe>
+        <div id="reloadBtn" style="display: none; position: absolute; bottom: 20px; right: 20px;">
+          <button onclick="reloadIframe('${iframeURL}')">Reload Iframe</button>
+        </div>
+      `;
+      break;
+  }
+
+  const iframe = document.getElementById('dynamicIframe');
+  const loader = document.getElementById('loader1');
+  const reloadBtn = document.getElementById('reloadBtn');
+
+  iframe.onload = function () {
+    loader.style.display = 'none';
+    reloadBtn.style.display = 'none';
+  };
+
+  iframe.onerror = function () {
+    loader.style.display = 'none';
+    reloadBtn.style.display = 'block';
+  };
+
+  setTimeout(() => {
+    if (loader.style.display !== 'none') {
+      reloadBtn.style.display = 'block';
+    }
+  }, 10000);
+}
+
+function reloadIframe(iframeURL) {
+  const iframe = document.getElementById('dynamicIframe');
+  const loader = document.getElementById('loader');
+  if (iframe && loader) {
+    loader.style.display = 'block';
+    iframe.src = '';
+    setTimeout(() => {
+      iframe.src = iframeURL;
+    }, 100);
+  } else {
+    console.error('Iframe or loader not found.');
+  }
+}
+window.reloadIframe = reloadIframe;
+
+
+function closeSlider() {
+  const body = document.body;
+  body.style.height = '100%';
+  body.style.overflowY = 'scroll';
+  const slider = document.getElementById('globalSlider');
+  if (slider.classList.contains('open')) {
+    slider.classList.remove('open');
+  }
+  slider.innerHTML = '';
+}
+
+window.toggleSlider = toggleSlider;
+window.closeSlider = closeSlider;
+
+function openBookModal(bookFor) {
+  switch (bookFor) {
+    case 'dashcam':
+      showLoader();
+      renderDashcamLayout();
+      document.body.style.height = '100vh';
+      document.body.style.overflowY = 'hidden';
+      break;
+    case 'cngBooking':
+      //
+      break;
+    case '2wg':
+      showLoader();
+      renderTwoWheelerLayout();
+      document.body.style.height = '100dvh';
+      document.body.style.overflowY = 'hidden';
+      break;
+  }
+}
+window.openBookModal = openBookModal;
+// openBookModal('2wg'); //tmp
+
+function renderDashcamLayout() {
+  const layout = document.getElementById('dashcam_booking');
+
+  if (layout) {
+    layout.style.display = 'block';
+    layout.style.overflow = 'hidden';
+
+    const tailwindScript = document.createElement('script');
+    tailwindScript.src = 'https://cdn.tailwindcss.com';
+    tailwindScript.onload = () => {
+      tailwind.config = {
+        prefix: 'tw-',
+        theme: {
+          extend: {
+            screens: {
+              'xs': { 'max': '600px' },
+            },
+          },
+        },
+      };
+      fetch('./components/booking-screens/dashcam-fitment/dashcam-booking.html')
+        .then(response => {
+          if (!response.ok) {
+            hideLoader();
+            throw new Error('Failed to load component');
+          }
+          return response.text();
+        })
+        .then(html => {
+          layout.innerHTML = html;
+          const moduleScript = document.createElement('script');
+          moduleScript.type = 'module';
+          // timestamp to avoid cache
+          moduleScript.src = `./components/booking-screens/dashcam-fitment/dashcam-booking.js?timestamp=${new Date().getTime()}`;
+          hideLoader();
+          document.body.appendChild(moduleScript);
+        })
+        .catch(error => {
+          console.error('Error loading component:', error);
+        });
+    };
+    document.head.appendChild(tailwindScript);
+
+  }
+}
+
+function renderTwoWheelerLayout() {
+  const layout = document.getElementById("twg_booking");
+
+  if (layout) {
+    layout.style.display = "block";
+    layout.style.overflow = "hidden";
+
+    const tailwindScript = document.createElement("script");
+    tailwindScript.src = "https://cdn.tailwindcss.com";
+
+    tailwindScript.onload = () => {
+      // TailwindCSS configuration
+      tailwind.config = {
+        prefix: "tw-",
+        theme: {
+          extend: {
+            screens: {
+              xs: { max: "600px" }, // Custom screen size
+            },
+          },
+        },
+      };
+
+      // Fetch and load the HTML component
+      fetch("./components/booking-screens/2w-general-sevice/2w-general-service-booking.html")
+        .then((response) => {
+          if (!response.ok) {
+            hideLoader();
+            throw new Error("Failed to load component");
+          }
+          return response.text();
+        })
+        .then((html) => {
+          layout.innerHTML = html;
+
+          // Load the corresponding JavaScript module for the component
+          const moduleScript = document.createElement("script");
+          moduleScript.type = "module";
+          moduleScript.src = `./components/booking-screens/2w-general-sevice/2w-general-service-booking.js?timestamp=${new Date().getTime()}`; // Avoid cache with timestamp
+          hideLoader();
+          document.body.appendChild(moduleScript);
+        })
+        .catch((error) => {
+          console.error("Error loading component:", error);
+        });
+    };
+
+    // Append the script to the document head
+    document.head.appendChild(tailwindScript);
+  }
+  document.body.style.height = '100%';
+  document.body.style.overflowY = 'scroll';
+}
+
+function showLoader() {
+  document.querySelector(".loader_parent").style.display = "flex";
+}
+
+function hideLoader() {
+  document.querySelector(".loader_parent").style.display = "none";
+}
+
+function closeBookingFlow(id) {
+  const layout = document.getElementById(id);
+  if (layout) {
+    layout.innerHTML = '';
+    layout.style.display = 'none';
+  }
+  document.body.style.height = '100%';
+  document.body.style.overflowY = 'scroll';
+}
+window.closeBookingFlow = closeBookingFlow;
